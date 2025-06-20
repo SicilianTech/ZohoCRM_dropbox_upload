@@ -1,0 +1,38 @@
+dropbox_access_token = "";
+// file/folder path in Dropbox where you wish to save the file
+dropbox_file_path = "/Zoho/";
+//Getting the file name
+recordId = "";
+attachments = zoho.crm.getRelatedRecords("Attachments","Accounts",recordId);
+for each  record in attachments
+{
+	fileName = record.get("File_Name");
+	info fileName;
+	file_id = record.get("id");
+downloadFile = invokeurl
+[
+url :"https://www.zohoapis.com/crm/v6/Accounts/" + recordId + "/Attachments/" + file_id
+type :GET
+connection:"coql"
+];
+downloadFile.setParamName("file");
+info downloadFile;
+	
+	headers = Map();
+	headers.put("Authorization","Bearer " + dropbox_access_token);
+	
+       headers.put("Content-Type", "application/octet-stream");
+	   data = map();
+     	
+		headers.put("Dropbox-API-Arg", "{\"path\":\"" + dropbox_file_path + downloadFile + "\",\"mode\":\"add\",\"autorename\":true,\"mute\":false,\"strict_conflict\":false}");
+        // Upload file to Dropbox using POST
+        response = invokeUrl
+        [
+        	url :  "https://content.dropboxapi.com/2/files/upload"
+        	type : POST
+        	parameters : data
+        	headers : headers
+        ];
+		
+}
+return "";
